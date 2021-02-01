@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -61,12 +62,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8080"
+	}
+
 	// we don't add pprof; it's done for us automatically
 
 	http.HandleFunc("/", handler)
 	http.Handle("/metrics", promhttp.Handler())
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	log.Printf("Listening on port %s", port)
+
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
 }
